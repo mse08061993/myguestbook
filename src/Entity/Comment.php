@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\DBAL\Types\Types;
 
 #[ORM\Entity]
 class Comment
@@ -18,15 +19,18 @@ class Comment
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 
+    #[ORM\Column(type: Types::TEXT)]
+    private ?string $text = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $photoFileName = null;
 
     #[ORM\ManyToOne(targetEntity: Conference::class, inversedBy: 'comments')]
     #[ORM\JoinColumn(nullable: false)]
-    private Conference $conference;
+    private ?Conference $conference = null;
 
     public function getId(): ?int
     {
@@ -57,6 +61,18 @@ class Comment
         return $this;
     }
 
+    public function getText(): ?string
+    {
+        return $this->text;
+    }
+
+    public function setText(?string $text = null): static
+    {
+        $this->text = $text;
+
+        return $this;
+    }
+
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
@@ -64,7 +80,7 @@ class Comment
 
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
-        $this->createAt = $createdAt;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
@@ -74,19 +90,19 @@ class Comment
         return $this->photoFileName;
     }
 
-    public function setPhotoFileName(string $photoFileName): static
+    public function setPhotoFileName(?string $photoFileName): static
     {
         $this->photoFileName = $photoFileName;
 
         return $this;
     }
 
-    public function getConference(): Conference
+    public function getConference(): ?Conference
     {
         return $this->conference;
     }
 
-    public function setConference(Conference $conference): static
+    public function setConference(?Conference $conference): static
     {
         $this->conference = $conference;
 

@@ -1,0 +1,21 @@
+{% extends "base.html.twig" %}
+
+{% block title%}
+    Conferences Guesbook - {{conference}}
+{% endblock %}
+
+{% block body %}
+    <h1>Conference {{ conference }}</h1>
+
+    {% if comments|length > 0 %}
+        {% for comment in comments %}
+            <h4>{{ comment.author }}</h4>
+            <small>
+                {{ comment.createdAt|format_datetime('medium', 'short') }}
+            </small>
+            <p>{{ comment.text }}</p>
+        {% endfor %}
+    {% else %}
+        <p>No comment have been posted yet for this conference.</p>
+    {% endif %}
+{% endblock %}

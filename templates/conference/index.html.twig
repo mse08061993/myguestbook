@@ -1,0 +1,14 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Conferences Guesbook{% endblock %}
+
+{% block body %}
+    <h1>Give your feedback!</h1>
+
+    {% for conference in conferences %}
+        <h4>{{ conference }}</h4>
+        <p>
+            <a href="{{ path('app_conference', {id: conference.id}) }}">View</a>
+        </p>
+    {% endfor %}
+{% endblock %}

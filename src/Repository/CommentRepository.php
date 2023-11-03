@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Repository;
 
 use App\Entity\Comment;
 use App\Entity\Conference;

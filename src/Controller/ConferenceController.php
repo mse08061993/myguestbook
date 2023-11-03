@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Conference;
 use App\Repository\ConferenceRepository;
-use App\Controller\CommentRepository;
+use App\Repository\CommentRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,8 +21,12 @@ class ConferenceController extends AbstractController
     }
 
     #[Route('/conference/{id}', 'app_conference')]
-    public function show(Request $request, Conference $conference, CommentRepository $commentRepository): Response
-    {
+    public function show(
+        Request $request,
+        Conference $conference,
+        CommentRepository $commentRepository,
+        ConferenceRepository $conferenceRepository,
+    ): Response {
         $offset = $request->query->getInt('offset', 0);
         $comments = $commentRepository->getPaginator($conference, $offset);
 

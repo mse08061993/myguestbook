@@ -5,8 +5,11 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[ORM\Entity]
+#[ORM\UniqueEntity('slug')]
 class Conference
 {
     #[ORM\Id]
@@ -22,6 +25,9 @@ class Conference
 
     #[ORM\Column]
     private ?bool $isInternational = null;
+
+    #[ORM\Column(length: 255, unique: true)]
+    private ?string $slug = null;
 
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'conference')]
     private Collection $comments;
@@ -72,6 +78,18 @@ class Conference
         return $this;
     }
 
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): static
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
     public function getComments(): Collection
     {
         return $this->comments;
@@ -102,5 +120,12 @@ class Conference
     public function __toString(): string
     {
         return $this->city . ' - ' . $this->year;
+    }
+
+    public function computeSlug(SluggerInterface $slugger): void
+    {
+        if (!$this->slug || '-' === $this->slug) {
+            $this->slug = $slugger->slug($this)->lower();
+        }
     }
 }

@@ -44,7 +44,7 @@ class Comment
         return $this->author;
     }
 
-    public function setAuthor(string $author): self
+    public function setAuthor(string $author): static
     {
         $this->author = $author;
 
@@ -56,7 +56,7 @@ class Comment
         return $this->email;
     }
 
-    public function setEmail(string $email): self
+    public function setEmail(string $email): static
     {
         $this->email = $email;
 
@@ -68,7 +68,7 @@ class Comment
         return $this->text;
     }
 
-    public function setText(?string $text = null): self
+    public function setText(?string $text = null): static
     {
         $this->text = $text;
 
@@ -80,7 +80,7 @@ class Comment
         return $this->createdAt;
     }
 
-    public function setCreatedAt(DateTimeImmutable $createdAt): self
+    public function setCreatedAt(DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
 
@@ -92,7 +92,7 @@ class Comment
         return $this->photoFileName;
     }
 
-    public function setPhotoFileName(?string $photoFileName): self
+    public function setPhotoFileName(?string $photoFileName): static
     {
         $this->photoFileName = $photoFileName;
 
@@ -104,7 +104,7 @@ class Comment
         return $this->conference;
     }
 
-    public function setConference(?Conference $conference): self
+    public function setConference(?Conference $conference): static
     {
         $this->conference = $conference;
 

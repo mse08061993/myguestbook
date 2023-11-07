@@ -4,8 +4,10 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
+use DateTimeImmutable;
 
 #[ORM\Entity]
+#[ORM\HasLifecycleCallbacks]
 class Comment
 {
     #[ORM\Id]
@@ -23,7 +25,7 @@ class Comment
     private ?string $text = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photoFileName = null;
@@ -42,7 +44,7 @@ class Comment
         return $this->author;
     }
 
-    public function setAuthor(string $author): static
+    public function setAuthor(string $author): self
     {
         $this->author = $author;
 
@@ -54,7 +56,7 @@ class Comment
         return $this->email;
     }
 
-    public function setEmail(string $email): static
+    public function setEmail(string $email): self
     {
         $this->email = $email;
 
@@ -66,19 +68,19 @@ class Comment
         return $this->text;
     }
 
-    public function setText(?string $text = null): static
+    public function setText(?string $text = null): self
     {
         $this->text = $text;
 
         return $this;
     }
 
-    public function getCreatedAt(): \DateTimeImmutable
+    public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function setCreatedAt(DateTimeImmutable $createdAt): self
     {
         $this->createdAt = $createdAt;
 
@@ -90,7 +92,7 @@ class Comment
         return $this->photoFileName;
     }
 
-    public function setPhotoFileName(?string $photoFileName): static
+    public function setPhotoFileName(?string $photoFileName): self
     {
         $this->photoFileName = $photoFileName;
 
@@ -102,10 +104,16 @@ class Comment
         return $this->conference;
     }
 
-    public function setConference(?Conference $conference): static
+    public function setConference(?Conference $conference): self
     {
         $this->conference = $conference;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAtToCurrentDate(): void
+    {
+        $this->createdAt = new DateTimeImmutable();
     }
 }

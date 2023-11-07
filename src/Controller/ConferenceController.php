@@ -25,7 +25,7 @@ class ConferenceController extends AbstractController
         Request $request,
         Conference $conference,
         CommentRepository $commentRepository,
-        ConferenceRepository $conferenceRepository,
+        ConferenceRepository $conferenceRepository
     ): Response {
         $offset = $request->query->getInt('offset', 0);
         $comments = $commentRepository->getPaginator($conference, $offset);

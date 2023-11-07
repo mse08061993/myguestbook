@@ -50,10 +50,14 @@ class CommentCrudController extends AbstractCrudController
             ->onlyOnIndex()
         ;
 
-        $createdAtField = DateTimeField::new('createdAt');
+        yield DateTimeField::new('createdAt')
+            ->onlyOnIndex()
+        ;
+
         if (Crud::PAGE_EDIT === $pageName) {
-            $createdAtField->setFormTypeOption('disabled', true);
+            yield DateTimeField::new('createdAt')
+                ->setFormTypeOption('disabled', true)
+            ;
         }
-        yield $createdAtField;
     }
 }

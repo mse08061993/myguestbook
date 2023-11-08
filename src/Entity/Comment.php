@@ -4,7 +4,9 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Validator\Constraints;
 use DateTimeImmutable;
+use Symfony\Component\Validator\Constraints\Email;
 
 #[ORM\Entity]
 #[ORM\HasLifecycleCallbacks]
@@ -16,12 +18,16 @@ class Comment
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Constraints\NotBlank]
     private ?string $author = null;
 
     #[ORM\Column(length: 255)]
+    #[Constraints\NotBlank]
+    #[Constraints\Email]
     private ?string $email = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Constraints\NotBlank]
     private ?string $text = null;
 
     #[ORM\Column]

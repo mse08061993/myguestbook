@@ -4,8 +4,10 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
+use DateTimeImmutable;
 
 #[ORM\Entity]
+#[ORM\HasLifecycleCallbacks]
 class Comment
 {
     #[ORM\Id]
@@ -23,7 +25,7 @@ class Comment
     private ?string $text = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photoFileName = null;
@@ -73,12 +75,12 @@ class Comment
         return $this;
     }
 
-    public function getCreatedAt(): \DateTimeImmutable
+    public function getCreatedAt(): DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function setCreatedAt(DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
 
@@ -107,5 +109,11 @@ class Comment
         $this->conference = $conference;
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedAtToCurrentDate(): void
+    {
+        $this->createdAt = new DateTimeImmutable();
     }
 }

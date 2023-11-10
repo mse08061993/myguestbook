@@ -9,7 +9,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[ORM\Entity]
-#[ORM\UniqueEntity('slug')]
+#[UniqueEntity('slug')]
 class Conference
 {
     #[ORM\Id]

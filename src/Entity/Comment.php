@@ -6,7 +6,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Validator\Constraints;
 use DateTimeImmutable;
-use Symfony\Component\Validator\Constraints\Email;
 
 #[ORM\Entity]
 #[ORM\HasLifecycleCallbacks]

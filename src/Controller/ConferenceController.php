@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\SpamChecker;
 use App\Entity\Conference;
 use App\Entity\Comment;
 use App\Form\CommentType;
@@ -32,6 +33,7 @@ class ConferenceController extends AbstractController
         EntityManagerInterface $entityManager,
         #[Autowire("%photo_directory%")]
         string $photoDirectory,
+        SpamChecker $spamChecker,
     ): Response {
         $comment = new Comment();
         $form = $this->createForm(CommentType::class, $comment);
@@ -45,6 +47,11 @@ class ConferenceController extends AbstractController
             }
             $comment->setConference($conference);
             $entityManager->persist($comment);
+
+            if (2 === $spamChecker->getSpamScore($comment, $request)) {
+                throw new \RuntimeException('Blatant spam, go away!');
+            }
+
             $entityManager->flush();
             return $this->redirectToRoute('app_conference', ['slug' => $conference->getSlug()]);
         }
@@ -59,5 +66,12 @@ class ConferenceController extends AbstractController
             'next' => min(count($comments), $offset + CommentRepository::COMMENTS_PER_PAGE),
             'form' => $form,
         ]);
+    }
+
+    #[Route('/test', 'app_test')]
+    public function test(Request $request): Response
+    {
+        dump($request);
+        return new Response(print_r($request->request->all(), 1));
     }
 }

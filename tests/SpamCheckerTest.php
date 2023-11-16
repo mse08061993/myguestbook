@@ -7,6 +7,7 @@ use App\Entity\Comment;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class SpamCheckerTest extends TestCase
 {
@@ -47,6 +48,34 @@ class SpamCheckerTest extends TestCase
         $spamChecker = $this->getSpamChecker('false');
         $score = $spamChecker->getSpamScore($this->comment, $this->context);
         $this->assertEquals(0, $score);
+    }
+
+    /**
+     * @dataProvider provideComments
+     */
+    public function testSpamScore(int $expectedScore, ResponseInterface $response, $comment, $context): void
+    {
+        $httpClient = new MockHttpClient($response);
+        $spamChecker = new SpamChecker($httpClient, '12345');
+
+        $actualScore = $spamChecker->getSpamScore($comment, $context);
+        $this->assertSame($expectedScore, $actualScore);
+    }
+
+    public static function provideComments(): iterable
+    {
+        $comment = new Comment();
+        $comment->setCreatedAtToCurrentDate();
+        $context = [];
+
+        $response = new MockResponse('', ['response_headers' => ['x-akismet-pro-tip: discard']]);
+        yield 'blatan_spam' => [2, $response, $comment, $context];
+
+        $response = new MockResponse('true');
+        yield 'spam' => [1, $response, $comment, $context];
+
+        $response = new MockResponse('false');
+        yield 'ham' => [0, $response, $comment, $context];
     }
 
     private function getSpamChecker(string $body = '', array $info = [])

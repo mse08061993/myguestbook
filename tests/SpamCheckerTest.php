@@ -10,18 +10,49 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 class SpamCheckerTest extends TestCase
 {
-    public function testSomething(): void
+    private Comment $comment;
+    private array $context;
+
+    protected function setUp(): void
     {
-        $response = new MockResponse('invalid');
-        $httpClient = new MockHttpClient($response);
-        $spamChecker = new SpamChecker($httpClient, '12345');
+        $this->comment = new Comment();
+        $this->comment->setCreatedAtToCurrentDate();
+        $this->context = [];
+    }
 
-        $comment = new Comment();
-        $comment->setCreatedAtToCurrentDate();
-        $context = [];
-
+    public function testInvalidApiKey(): void
+    {
+        $spamChecker = $this->getSpamChecker('invalid');
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Unable to check for spam: invalid.');
-        $spamChecker->getSpamScore($comment, $context);
+        $spamChecker->getSpamScore($this->comment, $this->context);
+    }
+
+    public function testBlatanSpam(): void
+    {
+        $spamChecker = $this->getSpamChecker('', ['response_headers' => ['x-akismet-pro-tip: discard']]);
+        $score = $spamChecker->getSpamScore($this->comment, $this->context);
+        $this->assertEquals(2, $score);
+    }
+
+    public function testSpam(): void
+    {
+        $spamChecker = $this->getSpamChecker('true');
+        $score = $spamChecker->getSpamScore($this->comment, $this->context);
+        $this->assertEquals(1, $score);
+    }
+
+    public function testHam(): void
+    {
+        $spamChecker = $this->getSpamChecker('false');
+        $score = $spamChecker->getSpamScore($this->comment, $this->context);
+        $this->assertEquals(0, $score);
+    }
+
+    private function getSpamChecker(string $body = '', array $info = [])
+    {
+        $response = new MockResponse($body, $info);
+        $httpClient = new MockHttpClient($response);
+        return new SpamChecker($httpClient, '12345');
     }
 }

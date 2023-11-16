@@ -5,7 +5,6 @@ namespace App;
 use App\Entity\Comment;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Symfony\Component\HttpFoundation\Request;
 
 class SpamChecker
 {
@@ -35,14 +34,12 @@ class SpamChecker
         $response = $this->httpClient->request('POST', $this->endpoint, ['body' => array_merge($parameters, $context)]);
 
         $headers = $response->getHeaders();
-        if (isset($headers['X-akismet-pro-tip']) && 'discard' === $headers['X-akismet-pro-tip'][0] ?? '') {
+        if (isset($headers['x-akismet-pro-tip']) && 'discard' === $headers['x-akismet-pro-tip'][0] ?? '') {
             return 2;
         }
 
         $content = $response->getContent();
-        if (isset($headers['x-akismet-debug-help'])) {
-            throw new \RuntimeException(sprintf('Unable to check for spam: %s (%s).', $content, $headers['x-akismet-debug-help'][0]));
-        } elseif ('invalid' === $content) {
+        if ('invalid' === $content) {
             throw new \RuntimeException(sprintf('Unable to check for spam: %s.', $content));
         }
 

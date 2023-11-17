@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block body %}
-    <h1>Conference {{ conference }}</h1>
+    <h2>Conference {{ conference }}</h2>
     {% if comments|length > 0 %}
         <p>There are {{ comments|length }} comments</p>
         {% for comment in comments %}

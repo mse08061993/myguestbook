@@ -48,7 +48,13 @@ class ConferenceController extends AbstractController
             $comment->setConference($conference);
             $entityManager->persist($comment);
 
-            if (2 === $spamChecker->getSpamScore($comment, $request)) {
+            $context = [
+                'user_ip' => $request->getClientIp(),
+                'user_agent' => $request->headers->get('user-agent'),
+                'referrer' => $request->headers->get('referer'),
+                'permalink' => $request->getUri(),
+            ];
+            if (2 === $spamChecker->getSpamScore($comment, $context)) {
                 throw new \RuntimeException('Blatant spam, go away!');
             }
 
@@ -66,12 +72,5 @@ class ConferenceController extends AbstractController
             'next' => min(count($comments), $offset + CommentRepository::COMMENTS_PER_PAGE),
             'form' => $form,
         ]);
-    }
-
-    #[Route('/test', 'app_test')]
-    public function test(Request $request): Response
-    {
-        dump($request);
-        return new Response(print_r($request->request->all(), 1));
     }
 }

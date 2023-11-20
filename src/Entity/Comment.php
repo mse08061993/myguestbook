@@ -39,6 +39,9 @@ class Comment
     #[ORM\JoinColumn(nullable: false)]
     private ?Conference $conference = null;
 
+    #[ORM\Column(length: 255, options: ['default' => 'submitted'])]
+    private ?string $state = 'submitted';
+
     public function getId(): ?int
     {
         return $this->id;
@@ -112,6 +115,18 @@ class Comment
     public function setConference(?Conference $conference): static
     {
         $this->conference = $conference;
+
+        return $this;
+    }
+
+    public function getState(): string
+    {
+        return $this->state;
+    }
+
+    public function setState(string $state): static
+    {
+        $this->state = $state;
 
         return $this;
     }

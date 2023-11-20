@@ -7,6 +7,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
@@ -54,6 +55,14 @@ class CommentCrudController extends AbstractCrudController
         ;
         yield DateTimeField::new('createdAt')
             ->onlyOnIndex()
+        ;
+
+        yield ChoiceField::new('state')
+            ->setChoices([
+                'Submitted' => 'submitted',
+                'Spam' => 'spam',
+                'Published' => 'published',
+            ])
         ;
 
         if (Crud::PAGE_EDIT === $pageName) {

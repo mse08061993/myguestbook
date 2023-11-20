@@ -32,13 +32,22 @@ class AppFixtures extends Fixture
         $conference2->setSlug('paris-2024');
         $manager->persist($conference2);
 
-        $comment = new Comment();
-        $comment->setConference($conference2);
-        $comment->setAuthor('Sergey');
-        $comment->setEmail('sergey@email.com');
-        $comment->setText('This was a great conference');
-        $comment->setCreatedAtToCurrentDate();
-        $manager->persist($comment);
+        $comment1 = new Comment();
+        $comment1->setConference($conference2);
+        $comment1->setAuthor('Sergey');
+        $comment1->setEmail('sergey@email.com');
+        $comment1->setText('This was a great conference');
+        $comment1->setState('published');
+        $comment1->setCreatedAtToCurrentDate();
+        $manager->persist($comment1);
+
+        $comment2 = new Comment();
+        $comment2->setConference($conference2);
+        $comment2->setAuthor('Ivan');
+        $comment2->setEmail('ivan@email.com');
+        $comment2->setText('I think this one is going to be moderated.');
+        $comment2->setCreatedAtToCurrentDate();
+        $manager->persist($comment1);
 
         $admin = new Admin();
         $admin->setUsername('admin');

@@ -5,6 +5,10 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     photo_directory: "%kernel.project_dir%/public/uploads/photos"
+    default_admin_email: admin@email.com
+    admin_email: "%env(string:default:default_admin_email:ADMIN_EMAIL)%"
+    default_base_url: https://localhost:8000
+    router.request_context.base_url: "%env(string:default:default_base_url:SYMFONY_DEFAULT_ROUTE_URL)%"
 
 services:
     # default configuration for services in *this* file

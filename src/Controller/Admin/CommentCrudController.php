@@ -60,7 +60,10 @@ class CommentCrudController extends AbstractCrudController
         yield ChoiceField::new('state')
             ->setChoices([
                 'Submitted' => 'submitted',
+                'Ham' => 'ham',
+                'Potential spam' => 'potential_spam',
                 'Spam' => 'spam',
+                'Rejected' => 'rejected',
                 'Published' => 'published',
             ])
         ;

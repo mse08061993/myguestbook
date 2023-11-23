@@ -7,12 +7,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\HttpKernel\HttpCache\StoreInterface;
 use Symfony\Component\Workflow\WorkflowInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
+#[Route('/admin')]
 class AdminController extends AbstractController
 {
-    #[Route('/admin/comment/review/{id}', 'app_review_comment')]
+    #[Route('/comment/review/{id}', 'app_review_comment')]
     public function reviewComment(
         Request $request,
         Comment $comment,
@@ -34,5 +37,20 @@ class AdminController extends AbstractController
             'transition' => $transition,
             'comment' => $comment,
         ]);
+    }
+
+    #[Route('/http-cache/{uri<.*>}')]
+    public function purgeCache(
+        Request $request,
+        KernelInterface $kernel,
+        StoreInterface $store,
+        string $uri,
+    ): Response {
+        if ('prod' === $kernel->getEnvironment()) {
+            return new Response(status: Response::HTTP_BAD_REQUEST);
+        }
+
+        $store->purge($request->getSchemeAndHttpHost() . '/' . $uri);
+        return new Response('Done!');
     }
 }

@@ -65,12 +65,12 @@ class ConferenceController extends AbstractController
         $offset = $request->query->getInt('offset', 0);
         $comments = $commentRepository->getPaginator($conference, $offset);
 
-        return $this->render('/conference/conference.html.twig', [
+        return $this->render('/conference/show.html.twig', [
             'conference' => $conference,
             'comments' => $comments,
             'previous' => $offset - CommentRepository::COMMENTS_PER_PAGE,
             'next' => min(count($comments), $offset + CommentRepository::COMMENTS_PER_PAGE),
-            'form' => $form,
+            'comment_form' => $form,
         ]);
     }
 

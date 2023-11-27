@@ -5,6 +5,7 @@ namespace App\MessageHandler;
 use App\Message\CommentMessage;
 use App\Repository\CommentRepository;
 use App\SpamChecker;
+use App\ImageOptimizer;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\NotificationEmail;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -24,8 +25,10 @@ class CommentMessageHandler
         private WorkflowInterface $commentStateMachine,
         private MessageBusInterface $messageBus,
         private LoggerInterface $logger,
-        #[Autowire('%admin_email%')] private string $adminEmail,
         private MailerInterface $mailer,
+        private ImageOptimizer $imageOptimizer,
+        #[Autowire('%admin_email%')] private string $adminEmail,
+        #[Autowire("%photo_directory%")] private string $photoDirectory,
     ) {
     }
 
@@ -45,7 +48,9 @@ class CommentMessageHandler
             };
             $this->commentStateMachine->apply($comment, $transition);
             $this->entityManager->flush();
-            $this->messageBus->dispatch($message);
+            if ('reject_spam' !== $transition) {
+                $this->messageBus->dispatch($message);
+            }
         } elseif (
             $this->commentStateMachine->can($comment, 'publish')
             || $this->commentStateMachine->can($comment, 'publish_ham')
@@ -61,6 +66,14 @@ class CommentMessageHandler
                 ])
             ;
             $this->mailer->send($email);
+        } elseif ($this->commentStateMachine->can($comment, 'optimize')) {
+            $photo = $comment->getPhotoFileName();
+            if ($photo) {
+                $photoPath = $this->photoDirectory . '/' . $comment->getPhotoFileName();
+                $this->imageOptimizer->resize($photoPath);
+            }
+            $this->commentStateMachine->apply($comment, 'optimize');
+            $this->entityManager->flush();
         } else {
             $this->logger->debug('Dropping comment message', [
                 'comment_id' => $comment->getId(),

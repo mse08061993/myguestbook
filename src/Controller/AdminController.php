@@ -3,12 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Comment;
+use App\Message\CommentMessage;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpKernel\HttpCache\StoreInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Workflow\WorkflowInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -21,6 +23,7 @@ class AdminController extends AbstractController
         Comment $comment,
         WorkflowInterface $commentStateMachine,
         EntityManagerInterface $entityManager,
+        MessageBusInterface $messageBus,
     ): Response {
         $reject = $request->query->get('reject');
         if ($commentStateMachine->can($comment, 'publish')) {
@@ -32,6 +35,10 @@ class AdminController extends AbstractController
         }
         $commentStateMachine->apply($comment, $transition);
         $entityManager->flush();
+
+        if (!$reject) {
+            $messageBus->dispatch(new CommentMessage($comment->getId()));
+        }
 
         return $this->render('admin/review_comment.html.twig', [
             'transition' => $transition,

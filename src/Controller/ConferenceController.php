@@ -32,8 +32,7 @@ class ConferenceController extends AbstractController
         Conference $conference,
         CommentRepository $commentRepository,
         EntityManagerInterface $entityManager,
-        #[Autowire("%photo_directory%")]
-        string $photoDirectory,
+        #[Autowire("%photo_directory%")] string $photoDirectory,
         MessageBusInterface $messageBus,
     ): Response {
         $comment = new Comment();

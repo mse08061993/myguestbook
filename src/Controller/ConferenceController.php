@@ -8,13 +8,16 @@ use App\Form\CommentType;
 use App\Repository\ConferenceRepository;
 use App\Repository\CommentRepository;
 use App\Message\CommentMessage;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Notifier\NotifierInterface;
+use Symfony\Component\Notifier\Notification\Notification;
 use Doctrine\ORM\EntityManagerInterface;
+
 
 class ConferenceController extends AbstractController
 {
@@ -34,6 +37,7 @@ class ConferenceController extends AbstractController
         EntityManagerInterface $entityManager,
         #[Autowire("%photo_directory%")] string $photoDirectory,
         MessageBusInterface $messageBus,
+        NotifierInterface $notifier,
     ): Response {
         $comment = new Comment();
         $form = $this->createForm(CommentType::class, $comment);
@@ -58,7 +62,15 @@ class ConferenceController extends AbstractController
             $message = new CommentMessage($comment->getId(), $context);
             $messageBus->dispatch($message);
 
+            $notification = new Notification('Thank you for your feedback. Your comment will be posted after moderation.', ['browser']);
+            $notifier->send($notification);
+
             return $this->redirectToRoute('app_conference', ['slug' => $conference->getSlug()]);
+        }
+
+        if ($form->isSubmitted()) {
+            $notification = new Notification('Can you check your submission? There are some problems with it.', ['browser']);
+            $notifier->send($notification);
         }
 
         $offset = $request->query->getInt('offset', 0);

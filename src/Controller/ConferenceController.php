@@ -13,6 +13,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Component\Notifier\Notification\Notification;
@@ -38,6 +39,7 @@ class ConferenceController extends AbstractController
         #[Autowire("%photo_directory%")] string $photoDirectory,
         MessageBusInterface $messageBus,
         NotifierInterface $notifier,
+        UrlGeneratorInterface $urlGenerator,
     ): Response {
         $comment = new Comment();
         $form = $this->createForm(CommentType::class, $comment);
@@ -59,7 +61,12 @@ class ConferenceController extends AbstractController
                 'referrer' => $request->headers->get('referer'),
                 'permalink' => $request->getUri(),
             ];
-            $message = new CommentMessage($comment->getId(), $context);
+            $reviewUrl = $urlGenerator->generate(
+                'app_review_comment',
+                ['id' => $comment->getId()],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
+            $message = new CommentMessage($comment->getId(), $reviewUrl, $context);
             $messageBus->dispatch($message);
 
             $notification = new Notification('Thank you for your feedback. Your comment will be posted after moderation.', ['browser']);

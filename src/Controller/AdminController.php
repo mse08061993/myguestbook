@@ -6,6 +6,7 @@ use App\Entity\Comment;
 use App\Message\CommentMessage;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -24,6 +25,7 @@ class AdminController extends AbstractController
         WorkflowInterface $commentStateMachine,
         EntityManagerInterface $entityManager,
         MessageBusInterface $messageBus,
+        UrlGeneratorInterface $urlGenerator,
     ): Response {
         $reject = $request->query->get('reject');
         if ($commentStateMachine->can($comment, 'publish')) {
@@ -37,7 +39,12 @@ class AdminController extends AbstractController
         $entityManager->flush();
 
         if (!$reject) {
-            $messageBus->dispatch(new CommentMessage($comment->getId()));
+            $reviewUrl = $urlGenerator->generate(
+                'app_review_comment',
+                ['id' => $comment->getId()],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            );
+            $messageBus->dispatch(new CommentMessage($comment->getId(), $reviewUrl));
         }
 
         return $this->render('admin/review_comment.html.twig', [

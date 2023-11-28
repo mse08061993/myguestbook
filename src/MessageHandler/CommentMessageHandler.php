@@ -54,7 +54,7 @@ class CommentMessageHandler
             $this->commentStateMachine->can($comment, 'publish')
             || $this->commentStateMachine->can($comment, 'publish_ham')
         ) {
-            $notification = new CommentReviewNotification($comment);
+            $notification = new CommentReviewNotification($comment, $message->getReviewUrl());
             $this->notifier->send($notification, ...$this->notifier->getAdminRecipients());
         } elseif ($this->commentStateMachine->can($comment, 'optimize')) {
             $photo = $comment->getPhotoFileName();

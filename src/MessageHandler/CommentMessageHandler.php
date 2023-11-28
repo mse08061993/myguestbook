@@ -6,13 +6,15 @@ use App\Message\CommentMessage;
 use App\Repository\CommentRepository;
 use App\SpamChecker;
 use App\ImageOptimizer;
+use App\Notification\CommentReviewNotification;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bridge\Twig\Mime\NotificationEmail;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Workflow\WorkflowInterface;
+use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Psr\Log\LoggerInterface;
 
 #[AsMessageHandler]
@@ -25,10 +27,11 @@ class CommentMessageHandler
         private WorkflowInterface $commentStateMachine,
         private MessageBusInterface $messageBus,
         private LoggerInterface $logger,
-        private MailerInterface $mailer,
         private ImageOptimizer $imageOptimizer,
-        #[Autowire('%admin_email%')] private string $adminEmail,
+        private NotifierInterface $notifier,
+        private MailerInterface $mailer,
         #[Autowire("%photo_directory%")] private string $photoDirectory,
+        #[Autowire("%admin_email%")] private string $adminEmail,
     ) {
     }
 
@@ -55,17 +58,8 @@ class CommentMessageHandler
             $this->commentStateMachine->can($comment, 'publish')
             || $this->commentStateMachine->can($comment, 'publish_ham')
         ) {
-            $email = new NotificationEmail();
-            $email
-                ->subject('New comment posted')
-                ->from($this->adminEmail)
-                ->to($this->adminEmail)
-                ->htmlTemplate('emails/comment_notification.html.twig')
-                ->context([
-                    'comment' => $comment,
-                ])
-            ;
-            $this->mailer->send($email);
+            $notification = new CommentReviewNotification($comment, $message->getReviewUrl());
+            $this->notifier->send($notification, ...$this->notifier->getAdminRecipients());
         } elseif ($this->commentStateMachine->can($comment, 'optimize')) {
             $photo = $comment->getPhotoFileName();
             if ($photo) {
@@ -74,6 +68,14 @@ class CommentMessageHandler
             }
             $this->commentStateMachine->apply($comment, 'optimize');
             $this->entityManager->flush();
+
+            $email = (new Email())
+                ->subject('Your comment posted.')
+                ->from($this->adminEmail)
+                ->to($comment->getEmail())
+                ->text('Your comment has been successfully posted. Thank you for your feedback.')
+            ;
+            $this->mailer->send($email);
         } else {
             $this->logger->debug('Dropping comment message', [
                 'comment_id' => $comment->getId(),

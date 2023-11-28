@@ -13,6 +13,8 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Workflow\WorkflowInterface;
 use Symfony\Component\Notifier\NotifierInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Psr\Log\LoggerInterface;
 
 #[AsMessageHandler]
@@ -26,8 +28,10 @@ class CommentMessageHandler
         private MessageBusInterface $messageBus,
         private LoggerInterface $logger,
         private ImageOptimizer $imageOptimizer,
-        #[Autowire("%photo_directory%")] private string $photoDirectory,
         private NotifierInterface $notifier,
+        private MailerInterface $mailer,
+        #[Autowire("%photo_directory%")] private string $photoDirectory,
+        #[Autowire("%admin_email%")] private string $adminEmail,
     ) {
     }
 
@@ -64,6 +68,14 @@ class CommentMessageHandler
             }
             $this->commentStateMachine->apply($comment, 'optimize');
             $this->entityManager->flush();
+
+            $email = (new Email())
+                ->subject('Your comment posted.')
+                ->from($this->adminEmail)
+                ->to($comment->getEmail())
+                ->text('Your comment has been successfully posted. Thank you for your feedback.')
+            ;
+            $this->mailer->send($email);
         } else {
             $this->logger->debug('Dropping comment message', [
                 'comment_id' => $comment->getId(),

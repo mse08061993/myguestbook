@@ -11,7 +11,7 @@ class ConferenceControllerTest extends WebTestCase
     public function testIndex(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/');
+        $client->request('GET', '/en/');
 
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('h2', 'Give your feedback!');
@@ -20,7 +20,7 @@ class ConferenceControllerTest extends WebTestCase
     public function testCommentSubmission()
     {
         $client = static::createClient();
-        $client->request('GET', '/conference/paris-2024');
+        $client->request('GET', '/en/conference/paris-2024');
         $email = 'ivan@email.com';
         $client->submitForm('Submit', [
             'comment[author]' => 'Sergey',
@@ -35,13 +35,13 @@ class ConferenceControllerTest extends WebTestCase
         self::getContainer()->get(EntityManagerInterface::class)->flush();
 
         $client->followRedirect();
-        $this->assertSelectorExists('p:contains("There are 2 comments")');
+        $this->assertSelectorExists('div:contains("There are 2 comments.")');
     }
 
     public function testConferencePage(): void
     {
         $client = static::createClient();
-        $crawler = $client->request('GET', '/');
+        $crawler = $client->request('GET', '/en/');
 
         $this->assertCount(2, $crawler->filter('h4'));
 
@@ -49,7 +49,7 @@ class ConferenceControllerTest extends WebTestCase
 
         $this->assertResponseIsSuccessful();
         $this->assertPageTitleContains('Paris');
-        $this->assertSelectorTextContains('h2', 'Conference Paris - 2024');
-        $this->assertSelectorExists('p:contains("There are 1 comments")');
+        $this->assertSelectorTextContains('h2', 'Paris - 2024 Conference');
+        $this->assertSelectorExists('div:contains("There is one comment")');
     }
 }

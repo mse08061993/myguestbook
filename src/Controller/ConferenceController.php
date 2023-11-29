@@ -19,10 +19,9 @@ use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Component\Notifier\Notification\Notification;
 use Doctrine\ORM\EntityManagerInterface;
 
-
 class ConferenceController extends AbstractController
 {
-    #[Route('/', 'app_homepage')]
+    #[Route('/{_locale<%supported_locales%>}/', 'app_homepage')]
     public function index(ConferenceRepository $conferenceRepository): Response
     {
         return $this->render('/conference/index.html.twig', [
@@ -30,7 +29,7 @@ class ConferenceController extends AbstractController
         ])->setSharedMaxAge(3600);
     }
 
-    #[Route('/conference/{slug}', 'app_conference')]
+    #[Route('/{_locale<%supported_locales%>}/conference/{slug}', 'app_conference')]
     public function show(
         Request $request,
         Conference $conference,
@@ -92,11 +91,17 @@ class ConferenceController extends AbstractController
         ]);
     }
 
-    #[Route('/conference_header', 'app_conference_header')]
+    #[Route('/{_locale<%supported_locales%>}/conference_header', 'app_conference_header')]
     public function conferenceHeader(ConferenceRepository $conferenceRepository): Response
     {
         return $this->render('conference/header.html.twig', [
             'conferences' => $conferenceRepository->findAll(),
         ])->setSharedMaxAge(3600);
     }
+
+	#[Route('/')]
+	public function indexNoLocale(): Response
+	{
+		return $this->redirectToRoute('app_homepage', ['_locale' => 'en']);
+	}
 }

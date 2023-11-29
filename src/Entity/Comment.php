@@ -62,7 +62,6 @@ class Comment
     private ?Conference $conference = null;
 
     #[ORM\Column(length: 255, options: ['default' => 'submitted'])]
-    #[Groups(['comment:list', 'comment:item'])]
     private ?string $state = 'submitted';
 
     public function getId(): ?int

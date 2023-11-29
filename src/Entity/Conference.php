@@ -2,31 +2,48 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity]
 #[UniqueEntity('slug')]
+#[ApiResource(
+    operations: [
+        new Get(normalizationContext: ['groups' => 'conference:item']),
+        new GetCollection(normalizationContext: ['groups' => 'conference:list']),
+    ],
+    order: ['year' => 'DESC', 'city' => 'ASC'],
+    paginationEnabled: false,
+)]
 class Conference
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['conference:list', 'conference:item'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['conference:list', 'conference:item'])]
     private ?string $city = null;
 
     #[ORM\Column(length: 4)]
+    #[Groups(['conference:list', 'conference:item'])]
     private ?string $year = null;
 
     #[ORM\Column]
+    #[Groups(['conference:list', 'conference:item'])]
     private ?bool $isInternational = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    #[Groups(['conference:list', 'conference:item'])]
     private ?string $slug = null;
 
     #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'conference')]
@@ -66,7 +83,7 @@ class Conference
         return $this;
     }
 
-    public function isInternational(): ?bool
+    public function getIsInternational(): ?bool
     {
         return $this->isInternational;
     }

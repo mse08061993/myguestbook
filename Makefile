@@ -11,6 +11,9 @@ tests:
 start:
 	symfony server:start -d
 	docker-compose up -d
+.PHONY: start
+
+get-messages:
 	symfony run -d --watch=config,src,templates,vendor symfony console messenger:consume async -vv
 .PHONY: start
 
